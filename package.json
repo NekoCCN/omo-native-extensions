@@ -1,0 +1,24 @@
+{
+  "name": "omo-native-extensions",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Community extensions for OmO Native: agent details, model routing, planning, and terminal UI.",
+  "keywords": ["pi-package", "omo-native", "extensions"],
+  "scripts": {
+    "test": "bun test ./extensions"
+  },
+  "dependencies": {
+    "jsonc-parser": "3.3.1"
+  },
+  "pi": {
+    "extensions": [
+      "./extensions/agent-detail-style/index.js",
+      "./extensions/auto-compact/index.js",
+      "./extensions/herdr-status/index.js",
+      "./extensions/planning-guide/index.js",
+      "./extensions/sidebar-density/index.js",
+      "./extensions/subagent-model/index.js"
+    ]
+  }
+}
