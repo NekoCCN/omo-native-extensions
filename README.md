@@ -27,7 +27,7 @@ Restart OmO or run `/reload` in an idle session. If you already have a manual co
 
 | Extension | What it does | Requirements and limits |
 | --- | --- | --- |
-| `agent-detail-style` | Restyles the popup opened from an existing **AGENTS** row. Tool groups and long replies can be folded; click a row or use `Ctrl+O`. The outer frame stays fixed while scrolling. | Native clickable side panel in the fullscreen TUI. Uses the native transcript snapshot, not a live tool-output stream. Unknown popup shapes retain native rendering. |
+| `agent-detail-style` | Restyles the popup opened from an existing **AGENTS** row. Tool groups and long replies fold independently without dropping text; click a row or use `Tab`/`Enter`/`Ctrl+O`. The outer frame stays fixed while scrolling. Capped native transcripts are explicitly marked. | Native clickable side panel in the fullscreen TUI. Uses the native transcript snapshot, not a live tool-output stream. Unknown popup shapes retain native rendering. |
 | `auto-compact` | `/auto-compact` shows model context usage and lets you preview, save, or reset a per-model early-compaction boundary. | TUI. Writes a reserve override to `settings.json` on confirmation; does not run compaction or change its adaptive policy. |
 | `herdr-status` | Uses `sakura-nocturne` for a session running inside Herdr without persisting the theme globally. | Herdr and an already-installed theme of that name. The theme itself is not bundled. |
 | `planning-guide` | Reminds the main session to size its plan, prefer `mass-ulw` where appropriate, and stop once it has evidence. | Uses existing OmO workflows. It does not enable formal Ultrawork or inject the reminder into child sessions. |
