@@ -1,5 +1,5 @@
 import { expect, test } from "bun:test";
-import { compactTools, renderPanelRows } from "./rows.js";
+import { compactTools, nativeAgentActions, renderPanelRows } from "./rows.js";
 
 const paint = (text) => text;
 
@@ -58,4 +58,26 @@ test("an empty background summary links the first row even when there is no AGEN
   expect(rendered).toEqual([
     "\x1b]8;;omo-sidebar-density:background/current\x07BACKGROUND  0\x1b]8;;\x07", "", ...rows,
   ]);
+});
+
+test("native action extraction retains all twelve Agent links, not just the eight painted rows", () => {
+  const ids = ["alpha%2F1", "bravo", "charlie", "delta", "echo", "foxtrot", "golf",
+    "hotel", "india", "juliet", "kilo", "%E4%B8%AD"];
+  const agents = ids.map((id, index) =>
+    `\x1b]8;;omo-panel:agent/${id}\x07\x1b[36m✓ QA Agent ${index + 1}\x1b[39m  \x1b]8;;\x07`);
+  const rows = ["AGENTS  12 done", ...agents, "",
+    "\x1b]8;;omo-panel:file/src\x07+ src\x1b]8;;\x07",
+    "\x1b]8;;https://example.org/\x07External\x1b]8;;\x07"];
+
+  expect(nativeAgentActions(rows)).toEqual(ids.map((id, index) => ({
+    url: `omo-panel:agent/${id}`, label: `✓ QA Agent ${index + 1}`,
+  })));
+});
+
+test("Agent text without a complete native hyperlink is not actionable", () => {
+  expect(nativeAgentActions([
+    "AGENTS  2 done", "✓ Unlinked agent",
+    "\x1b]8;;omo-panel:agent/broken\x07Unterminated link",
+    "\x1b]8;;omo-panel:agent/\x07Missing id\x1b]8;;\x07",
+  ])).toEqual([]);
 });

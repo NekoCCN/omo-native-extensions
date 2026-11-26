@@ -1,7 +1,8 @@
 import { stripVTControlCharacters } from "node:util";
 import { Container, Text, truncateToWidth, wrapTextWithAnsi } from "@earendil-works/pi-tui";
 import { createBackgroundTasks } from "./background.js";
-import { backgroundUrl, isAgentHeading, isAgentRow, renderPanelRows } from "./rows.js";
+import { backgroundUrl, isAgentHeading, isAgentRow, nativeAgentActions, renderPanelRows } from "./rows.js";
+import { registerSidebarActions } from "./sidebar-actions.js";
 
 const layout = Symbol.for("@earendil-works/pi-tui/layout-node");
 const viewport = Symbol.for("@earendil-works/pi-tui/viewport");
@@ -49,8 +50,12 @@ function attach(tui, theme, { ctx, bg }) {
   let agentsPainted = false;
   const wrappedWidgets = new WeakSet();
 
-  const visible = () => active && tui.layoutRoot === root && panel.render === paint &&
-    Boolean(right.visible({ width: tui.terminal.columns, height: tui.terminal.rows }));
+  const mounted = () => active && tui.layoutRoot === root && panel.render === paint;
+  const visible = () => mounted() && Boolean(right.visible({ width: tui.terminal.columns, height: tui.terminal.rows }));
+  // The native renderer pads each row to the requested width. Use a wider
+  // projection for search labels, even when layout skips painting the column.
+  const readAgentActions = () => mounted() && typeof previousOpenUrl === "function"
+    ? nativeAgentActions(renderPanel.call(panel, 512)) : [];
   function openUrl(url) {
     if (url !== backgroundUrl) return previousOpenUrl?.call(this, url);
     if (visible()) {
@@ -114,6 +119,13 @@ function attach(tui, theme, { ctx, bg }) {
   return {
     root,
     showsAgents: () => visible() && agentsPainted,
+    agentActions: () => readAgentActions().map(({ url, label }) => ({
+      label,
+      run() {
+        if (readAgentActions().some((action) => action.url === url)) return tui.openUrl(url);
+        ctx.ui.notify("This Agent link is no longer available. See /tasks.", "info");
+      },
+    })),
     dispose() {
       active = false;
       unsubscribe();
@@ -127,13 +139,14 @@ function attach(tui, theme, { ctx, bg }) {
 export default function sidebarDensity(pi) {
   const bg = createBackgroundTasks(pi);
   let cleanup;
+  let installed;
+  registerSidebarActions(pi, { bg, agents: () => installed?.agentActions() ?? [] });
   pi.on("session_shutdown", () => cleanup?.());
   pi.on("session_start", (_event, ctx) => {
     cleanup?.();
     if (!ctx.hasUI || ctx.mode !== "tui") return;
     const ui = ctx.ui;
     const setWidget = ui.setWidget;
-    let installed;
     let disposed = false;
     const widgetContents = new Map();
     function setTaskWidget(key, content, options) {
@@ -164,6 +177,7 @@ export default function sidebarDensity(pi) {
     cleanup = () => {
       disposed = true;
       installed?.dispose();
+      installed = undefined;
       if (ui.setWidget === setTaskWidget) {
         ui.setWidget = setWidget;
         for (const [key, { content, options }] of widgetContents) setWidget.call(ui, key, content, options);

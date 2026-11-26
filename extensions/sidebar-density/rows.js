@@ -2,7 +2,18 @@ import { stripVTControlCharacters } from "node:util";
 
 const agentLimit = 8;
 const osc8 = "\x1b]8;;";
+// The native row wrapper emits a BEL-terminated OSC 8 link around the whole row.
+const agentLink = /^\x1b\]8;;(omo-panel:agent\/(?:[A-Za-z0-9_.!~*'()-]|%[0-9A-Fa-f]{2})+)\x07(.*?)\x1b\]8;;\x07$/u;
 export const backgroundUrl = "omo-sidebar-density:background/current";
+
+export function nativeAgentActions(rows) {
+  const actions = [];
+  for (const row of rows) {
+    const link = agentLink.exec(row);
+    if (link) actions.push({ url: link[1], label: stripVTControlCharacters(link[2]).trim() });
+  }
+  return actions;
+}
 
 export function isAgentHeading(row) {
   return /^AGENTS(?:\s|…|$)/u.test(stripVTControlCharacters(row));
