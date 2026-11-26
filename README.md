@@ -31,7 +31,7 @@ Restart OmO or run `/reload` in an idle session. If you already have a manual co
 | `auto-compact` | `/auto-compact` shows model context usage and lets you preview, save, or reset a per-model early-compaction boundary. | TUI. Writes a reserve override to `settings.json` on confirmation; does not run compaction or change its adaptive policy. |
 | `herdr-status` | Uses `sakura-nocturne` for a session running inside Herdr without persisting the theme globally. | Herdr and an already-installed theme of that name. The theme itself is not bundled. |
 | `planning-guide` | Reminds the main session to size its plan, prefer `mass-ulw` where appropriate, and stop once it has evidence. | Uses existing OmO workflows. It does not enable formal Ultrawork or inject the reminder into child sessions. |
-| `sidebar-density` | Makes the native TUI sidebar denser, including tool summaries and todo presentation. | Native sidebar and supported viewport layout. It does not enable the sidebar on its own. |
+| `sidebar-density` | Compacts tool and TODO displays, shows up to eight **AGENTS**, and adds a clickable **BACKGROUND** row for the current session’s shell jobs and monitors. | Native fullscreen sidebar. The background popup is read-only; this extension does not enable the sidebar on its own. |
 | `subagent-model` | `/subagent-model` exposes model, thinking, and description editing for native roles and categories. | TUI, an existing OmO configuration, and `omo doctor --models --json`. No preset provider keys or model routing are shipped. |
 
 The TUI adapters are local extensions, not modifications to the OmO installer or runtime. They target the native surface described above; other hosts and future OmO versions may differ.
